@@ -10,7 +10,7 @@ const colors = {
 
 const getLineFromStack = (stack: string) => {
   const lines = stack.split("\n");
-  const lineString = lines[3];
+  const lineString = lines[4];
   let match = lineString.match(/at .*? \((.*)\)/);
 
   // Try other match

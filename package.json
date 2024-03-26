@@ -8,14 +8,16 @@
   "author": "nathandiepeveen",
   "license": "ISC",
   "scripts": {
-    "build": "npx ncc build src/index.ts -o dist -m -C -e third-party-pkg"
+    "build": "webpack",
+    "test": "webpack && node test/test.js"
   },
   "devDependencies": {
     "@types/node": "^20.11.30",
     "ts-loader": "^9.5.1",
     "typescript": "^5.4.3",
     "webpack": "^5.91.0",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "webpack-node-externals": "^3.0.0"
   },
   "dependencies": {
     "chalk": "4.1.2"

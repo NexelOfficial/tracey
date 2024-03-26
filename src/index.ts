@@ -1,8 +1,14 @@
 import chalk from "chalk";
 import { getColoredLine } from "./line";
 
-class Tracey {
-  #pattern = "{type} [{file}]: {message}";
+type LogOptions = {
+  pin: boolean;
+};
+
+export class Tracey {
+  #pattern: string = "{level} [{file}]: {message}";
+  #pin: string | undefined;
+  #pinned: string = chalk.bgCyan("pinned");
 
   constructor(pattern?: string) {
     if (pattern) {
@@ -10,30 +16,57 @@ class Tracey {
     }
   }
 
-  #buildFromPattern(type: string, message: string) {
+  #getTime() {
+    return chalk.bgGrey(new Date().toLocaleTimeString());
+  }
+
+  #buildFromPattern(level: string, message: string) {
     const file = getColoredLine();
     return this.#pattern
-      .replace("{type}", type)
+      .replace("{level}", level)
       .replace("{file}", file)
-      .replace("{message}", message);
+      .replace("{message}", message)
+      .replace("{time}", this.#getTime());
   }
 
-  info(message: string) {
-    const type = chalk.bgBlue("info");
-    const out = this.#buildFromPattern(type, message);
-    console.log(out);
+  #log(message: string, opts?: LogOptions) {
+    if (opts?.pin) {
+      if (!this.#pin) {
+        process.stdout.write("\n");
+      }
+
+      this.#pin = message;
+      process.stdout.clearLine(0);
+      process.stdout.cursorTo(0);
+      process.stdout.write(`${this.#pinned} ${message}`);
+      return;
+    }
+
+    if (this.#pin) {
+      process.stdout.cursorTo(0);
+      process.stdout.clearLine(0);
+      process.stdout.write(`${message}\n${this.#pinned} ${this.#pin}`);
+    } else {
+      process.stdout.write("\n" + message);
+    }
   }
 
-  error(message: string) {
-    const type = chalk.bgRed("err");
-    const out = this.#buildFromPattern(type, message);
-    console.log(out);
+  info(message: string, opts?: LogOptions) {
+    const level = chalk.bgBlue("info");
+    const out = this.#buildFromPattern(level, message);
+    this.#log(out, opts);
   }
 
-  warn(message: string) {
-    const type = chalk.bgYellow("warn");
-    const out = this.#buildFromPattern(type, message);
-    console.log(out);
+  error(message: string, opts?: LogOptions) {
+    const level = chalk.bgRed("err");
+    const out = this.#buildFromPattern(level, message);
+    this.#log(out, opts);
+  }
+
+  warn(message: string, opts?: LogOptions) {
+    const level = chalk.bgYellow("warn");
+    const out = this.#buildFromPattern(level, message);
+    this.#log(out, opts);
   }
 }
 
